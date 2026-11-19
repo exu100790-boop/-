@@ -1,74 +1,395 @@
-mascot-box {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 14px;
-  cursor: pointer;
-  user-select: none;
-}
+const GRID_SIZE = 10;
+const STORAGE_KEY = "good_baby_stamp_v2";
+const USE_PIN = true;
+const STAMP_PIN = "980512";
 
-.speech-bubble {
-  background: #fff0f6;
-  color: #a61e4d;
-  border: 1.5px solid #fcc2d7;
-  padding: 6px 14px;
-  border-radius: 999px;
-  font-size: 0.85rem;
-  font-weight: 700;
-  margin-bottom: 8px;
-  box-shadow: 0 4px 10px rgba(214, 51, 132, 0.08);
-  transition: transform 0.2s ease;
-}
+const REWARDS = [
+  { id: "r1", title: "喝一杯喜歡的手搖飲", cost: 3 },
+  { id: "r2", title: "免做一次指定小事", cost: 5 },
+  { id: "r3", title: "一起吃頓好料大餐", cost: 10 },
+];
 
-.mascot-frame {
-  width: 100%;
-  max-height: 185px;
-  border-radius: 14px;
-  overflow: hidden;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  animation: kuromiFloat 2.8s ease-in-out infinite;
-  transform-origin: center bottom;
-}
+const gridEl = document.getElementById("grid");
+const countEl = document.getElementById("count");
+const milestoneTextEl = document.getElementById("milestoneText");
+const reasonInputEl = document.getElementById("reasonInput");
+const stampBtn = document.getElementById("stampBtn");
+const undoBtn = document.getElementById("undoBtn");
+const resetBtn = document.getElementById("resetBtn");
+const rewardListEl = document.getElementById("rewardList");
+const historyListEl = document.getElementById("historyList");
+const exportBtn = document.getElementById("exportBtn");
+const importBtn = document.getElementById("importBtn");
 
-.mascot-frame img {
-  width: 100%;
-  height: 185px;
-  object-fit: cover;
-  border-radius: 14px;
-  border: 2px solid #f3d9fa;
-}
+const mascotBox = document.getElementById("mascotBox");
+const mascotFrame = document.getElementById("mascotFrame");
+const speechBubble = document.getElementById("speechBubble");
 
-/* 平時輕輕浮動微搖 */
-@keyframes kuromiFloat {
-  0%, 100% {
-    transform: translateY(0px) rotate(-1deg);
+const KUROMI_LINES = [
+  "哼哼，表現不錯嘛！繼續保持～",
+  "再多集幾顆章就可以換獎勵囉！",
+  "今天也有乖乖聽話嗎？",
+  "庫洛米正在盯著你的集點卡喔！",
+  "超棒的！離大獎又更近一步了！",
+];
+
+let state = loadState();
+let lastAnimatedIndex = -1;
+
+// 動態建立自訂扣點區塊
+const deductBox = document.createElement("div");
+deductBox.className = "stamp-box";
+deductBox.style.marginBottom = "14px";
+deductBox.innerHTML = `
+  <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+    <input
+      id="deductAmountInput"
+      type="number"
+      min="1"
+      value="1"
+      style="width:78px; margin-bottom:0; text-align:center;"
+    />
+    <input
+      id="deductReasonInput"
+      type="text"
+      maxlength="30"
+      placeholder="扣點原因（例如：犯規、兌換小東西）"
+      style="flex:1; min-width:150px; margin-bottom:0;"
+    />
+    <button id="deductBtn" type="button" class="danger-ghost">扣點</button>
+  </div>
+`;
+rewardListEl.parentElement.insertBefore(deductBox, rewardListEl);
+
+const deductAmountInputEl = document.getElementById("deductAmountInput");
+const deductReasonInputEl = document.getElementById("deductReasonInput");
+const deductBtn = document.getElementById("deductBtn");
+
+function triggerKuromiCheer(customLine) {
+  if (!mascotFrame || !speechBubble) return;
+  if (customLine) {
+    speechBubble.textContent = customLine;
+  } else {
+    const pick = KUROMI_LINES[Math.floor(Math.random() * KUROMI_LINES.length)];
+    speechBubble.textContent = pick;
   }
-  50% {
-    transform: translateY(-6px) rotate(1.2deg);
+  mascotFrame.classList.remove("cheer");
+  void mascotFrame.offsetWidth;
+  mascotFrame.classList.add("cheer");
+}
+
+function defaultState() {
+  return {
+    points: 0,
+    rotations: [],
+    history: [],
+  };
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return defaultState();
+    const parsed = JSON.parse(raw);
+    return {
+      points: Number(parsed.points) || 0,
+      rotations: Array.isArray(parsed.rotations) ? parsed.rotations : [],
+      history: Array.isArray(parsed.history) ? parsed.history : [],
+    };
+  } catch {
+    return defaultState();
   }
 }
 
-/* 蓋章或點擊時的開心彈跳 */
-.mascot-frame.cheer {
-  animation: kuromiCheer 0.55s cubic-bezier(0.28, 1.45, 0.42, 1);
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
-@keyframes kuromiCheer {
-  0%   { transform: scale(1) translateY(0); }
-  35%  { transform: scale(1.06, 0.94) translateY(-12px) rotate(-3deg); }
-  65%  { transform: scale(0.97, 1.03) translateY(-4px) rotate(3deg); }
-  100% { transform: scale(1) translateY(0) rotate(0deg); }
+function syncRotationsToPoints() {
+  const activeInPage =
+    state.points % GRID_SIZE === 0 && state.points > 0
+      ? GRID_SIZE
+      : state.points % GRID_SIZE;
+
+  while (state.rotations.length < activeInPage) {
+    state.rotations.push(Math.floor(Math.random() * 17) - 8);
+  }
+  if (state.rotations.length > activeInPage) {
+    state.rotations = state.rotations.slice(0, activeInPage);
+  }
 }
 
-/* 備用小庫洛米眨眼動畫 */
-#svgKuromi .eye {
-  transform-origin: center;
-  animation: eyeBlink 3.6s infinite;
+function formatNow() {
+  const d = new Date();
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${d.getMonth() + 1}/${d.getDate()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-@keyframes eyeBlink {
-  0%, 92%, 100% { transform: scaleY(1); }
-  95%           { transform: scaleY(0.1); }
+function verifyPin(actionLabel) {
+  if (!USE_PIN) return true;
+  const input = prompt(`請輸入「${actionLabel}」密碼：`);
+  if (input === null) return false;
+  if (input !== STAMP_PIN) {
+    alert("密碼錯誤，操作已取消！");
+    return false;
+  }
+  return true;
 }
+
+function playStampSound() {
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    const ctx = new AudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = "triangle";
+    osc.frequency.setValueAtTime(190, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(68, ctx.currentTime + 0.12);
+    gain.gain.setValueAtTime(0.28, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.13);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.14);
+  } catch {
+    // 瀏覽器未授權音效時略過
+  }
+}
+
+function renderGrid() {
+  gridEl.innerHTML = "";
+  const activeInPage =
+    state.points % GRID_SIZE === 0 && state.points > 0
+      ? GRID_SIZE
+      : state.points % GRID_SIZE;
+
+  for (let i = 0; i < GRID_SIZE; i++) {
+    const slot = document.createElement("div");
+    slot.className = "slot";
+
+    if (i < activeInPage) {
+      const stamp = document.createElement("div");
+      stamp.className = "stamp";
+      if (i === lastAnimatedIndex) {
+        stamp.classList.add("pop");
+      }
+      const rot = state.rotations[i] ?? -6;
+      stamp.style.setProperty("--rot", `${rot}deg`);
+      stamp.textContent = "乖寶寶";
+      slot.appendChild(stamp);
+    }
+
+    gridEl.appendChild(slot);
+  }
+
+  countEl.textContent = state.points;
+  const completedRounds = Math.floor(state.points / GRID_SIZE);
+  milestoneTextEl.textContent =
+    `本輪集點進度：${activeInPage} / ${GRID_SIZE}` +
+    (completedRounds > 0 ? `（已完成 ${completedRounds} 輪）` : "");
+}
+
+function renderRewards() {
+  rewardListEl.innerHTML = "";
+  REWARDS.forEach((reward) => {
+    const item = document.createElement("div");
+    item.className = "reward-item";
+
+    const info = document.createElement("div");
+    info.className = "reward-info";
+    info.innerHTML = `${reward.title}<span class="reward-cost">需要 ${reward.cost} 顆章</span>`;
+
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "redeem-btn";
+    btn.textContent = "兌換";
+    btn.disabled = state.points < reward.cost;
+    btn.addEventListener("click", () => redeemReward(reward));
+
+    item.append(info, btn);
+    rewardListEl.appendChild(item);
+  });
+}
+
+function renderHistory() {
+  historyListEl.innerHTML = "";
+  if (state.history.length === 0) {
+    historyListEl.innerHTML = `<p class="empty-tip">還沒有任何紀錄，快蓋下第一個乖寶寶章吧！</p>`;
+    return;
+  }
+
+  state.history.forEach((entry) => {
+    const li = document.createElement("li");
+    li.className = `history-item ${entry.type === "redeem" ? "redeem" : ""}`;
+    li.innerHTML = `
+      <div>${entry.text}</div>
+      <div class="history-meta">${entry.time}</div>
+    `;
+    historyListEl.appendChild(li);
+  });
+}
+
+function renderAll() {
+  syncRotationsToPoints();
+  renderGrid();
+  renderRewards();
+  renderHistory();
+  deductBtn.disabled = state.points <= 0;
+  undoBtn.disabled = state.history.length === 0;
+  resetBtn.disabled = state.points === 0 && state.history.length === 0;
+}
+
+function addStamp() {
+  if (!verifyPin("蓋章")) return;
+
+  const reason = reasonInputEl.value.trim() || "表現超棒獲得乖寶寶章";
+  state.points += 1;
+
+  const posInPage = (state.points - 1) % GRID_SIZE;
+  const randomAngle = Math.floor(Math.random() * 17) - 8;
+  if (posInPage === 0) {
+    state.rotations = [randomAngle];
+  } else {
+    state.rotations[posInPage] = randomAngle;
+  }
+  lastAnimatedIndex = posInPage;
+
+  state.history.unshift({
+    id: Date.now() + Math.random(),
+    type: "stamp",
+    delta: 1,
+    reason,
+    text: `獲得 +1 章｜${reason}`,
+    time: formatNow(),
+  });
+
+  reasonInputEl.value = "";
+  playStampSound();
+  saveState();
+  renderAll();
+  triggerKuromiCheer("耶！成功蓋下一顆乖寶寶章！");
+}
+
+function deductPoints() {
+  if (state.points <= 0) return;
+  const rawAmount = Math.floor(Number(deductAmountInputEl.value));
+  if (!Number.isFinite(rawAmount) || rawAmount <= 0) {
+    alert("請輸入大於 0 的扣點數量！");
+    return;
+  }
+  if (rawAmount > state.points) {
+    alert(`目前只有 ${state.points} 顆章，無法扣 ${rawAmount} 顆！`);
+    return;
+  }
+  if (!verifyPin("扣點")) return;
+
+  const reason = deductReasonInputEl.value.trim() || "手動扣點";
+  state.points -= rawAmount;
+  lastAnimatedIndex = -1;
+
+  state.history.unshift({
+    id: Date.now() + Math.random(),
+    type: "redeem",
+    delta: -rawAmount,
+    reason,
+    text: `扣點 -${rawAmount} 章｜${reason}`,
+    time: formatNow(),
+  });
+
+  deductReasonInputEl.value = "";
+  deductAmountInputEl.value = "1";
+  saveState();
+  renderAll();
+  triggerKuromiCheer("哎呀被扣點了，下次要加油喔！");
+}
+
+function redeemReward(reward) {
+  if (state.points < reward.cost) return;
+  if (!verifyPin("兌換獎勵")) return;
+
+  state.points -= reward.cost;
+  lastAnimatedIndex = -1;
+
+  state.history.unshift({
+    id: Date.now() + Math.random(),
+    type: "redeem",
+    delta: -reward.cost,
+    rewardTitle: reward.title,
+    text: `兌換「${reward.title}」(-${reward.cost} 章)`,
+    time: formatNow(),
+  });
+
+  saveState();
+  renderAll();
+  triggerKuromiCheer(`哇～成功兌換「${reward.title}」囉！`);
+}
+
+function undoLast() {
+  if (state.history.length === 0) return;
+  if (!verifyPin("撤銷上一筆")) return;
+
+  const last = state.history.shift();
+  state.points = Math.max(0, state.points - (last.delta || 0));
+  lastAnimatedIndex = -1;
+
+  saveState();
+  renderAll();
+}
+
+function resetAll() {
+  if (!confirm("確定要清空所有章數與歷史紀錄嗎？")) return;
+  if (!verifyPin("清空全部")) return;
+
+  state = defaultState();
+  lastAnimatedIndex = -1;
+  saveState();
+  renderAll();
+}
+
+async function exportSave() {
+  const payload = JSON.stringify(state);
+  try {
+    await navigator.clipboard.writeText(payload);
+    alert("存檔代碼已複製到剪貼簿！可以貼到另一台裝置匯入。");
+  } catch {
+    prompt("請手動複製以下存檔代碼：", payload);
+  }
+}
+
+function importSave() {
+  const raw = prompt("請貼上之前複製的存檔代碼（會覆蓋目前紀錄）：");
+  if (!raw) return;
+  try {
+    const parsed = JSON.parse(raw.trim());
+    state = {
+      points: Math.max(0, Number(parsed.points) || 0),
+      rotations: Array.isArray(parsed.rotations) ? parsed.rotations : [],
+      history: Array.isArray(parsed.history) ? parsed.history : [],
+    };
+    lastAnimatedIndex = -1;
+    saveState();
+    renderAll();
+    alert("存檔匯入成功！");
+  } catch {
+    alert("存檔格式不正確，匯入失敗！");
+  }
+}
+
+if (mascotBox) {
+  mascotBox.addEventListener("click", () => triggerKuromiCheer());
+}
+
+stampBtn.addEventListener("click", addStamp);
+reasonInputEl.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") addStamp();
+});
+deductBtn.addEventListener("click", deductPoints);
+deductReasonInputEl.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") deductPoints();
+});
+undoBtn.addEventListener("click", undoLast);
+resetBtn.addEventListener("click", resetAll);
+exportBtn.addEventListener("click", exportSave);
+importBtn.addEventListener("click", importSave);
+
+renderAll();
