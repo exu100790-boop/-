@@ -9,6 +9,33 @@
 <body>
   <main class="app">
     <section class="card">
+      <!-- 動態庫洛米互動區 -->
+      <div class="mascot-box" id="mascotBox" title="點我跟庫洛米互動！">
+        <div class="speech-bubble" id="speechBubble">今天也要當乖寶寶喔！</div>
+        <div class="mascot-frame" id="mascotFrame">
+          <img
+            id="kuromiImg"
+            src="kuromi.jpg"
+            alt="庫洛米"
+            onerror="this.style.display='none'; document.getElementById('svgKuromi').style.display='block';"
+          />
+          <!-- 萬一還沒上傳圖片時的備用動態小庫洛米 -->
+          <svg id="svgKuromi" viewBox="0 0 120 110" style="display:none; width:115px; height:105px;">
+            <polygon points="22,55 12,10 48,35" fill="#2b262d" />
+            <polygon points="98,55 108,10 72,35" fill="#2b262d" />
+            <circle cx="12" cy="10" r="5" fill="#ff8fb1" />
+            <circle cx="108" cy="10" r="5" fill="#ff8fb1" />
+            <ellipse cx="60" cy="64" rx="38" ry="32" fill="#2b262d" />
+            <ellipse cx="60" cy="69" rx="28" ry="22" fill="#ffffff" />
+            <circle cx="60" cy="44" r="7" fill="#ff8fb1" />
+            <ellipse class="eye" cx="48" cy="68" rx="3.5" ry="5" fill="#2b262d" />
+            <ellipse class="eye" cx="72" cy="68" rx="3.5" ry="5" fill="#2b262d" />
+            <ellipse cx="60" cy="73" rx="3" ry="2" fill="#ff8fb1" />
+            <path d="M54 79 Q60 85 66 79" stroke="#2b262d" stroke-width="2.5" fill="none" stroke-linecap="round" />
+          </svg>
+        </div>
+      </div>
+
       <div class="top-bar">
         <h1>乖寶寶集點卡</h1>
         <span class="badge">持有章數：<strong id="count">0</strong> 顆</span>
