@@ -156,6 +156,32 @@ function playStampSound() {
   }
 }
 
+function createKuromiStampElement(rot, shouldPop) {
+  const stamp = document.createElement("div");
+  stamp.className = "stamp";
+  if (shouldPop) {
+    stamp.classList.add("pop");
+  }
+  stamp.style.setProperty("--rot", `${rot}deg`);
+  stamp.innerHTML = `
+    <svg viewBox="0 0 120 110" aria-hidden="true">
+      <polygon points="22,55 12,10 48,35" fill="#2b262d" />
+      <polygon points="98,55 108,10 72,35" fill="#2b262d" />
+      <circle cx="12" cy="10" r="5" fill="#ff8fb1" />
+      <circle cx="108" cy="10" r="5" fill="#ff8fb1" />
+      <ellipse cx="60" cy="64" rx="38" ry="32" fill="#2b262d" />
+      <ellipse cx="60" cy="69" rx="28" ry="22" fill="#ffffff" />
+      <circle cx="60" cy="44" r="7" fill="#ff8fb1" />
+      <ellipse cx="48" cy="68" rx="3.5" ry="5" fill="#2b262d" />
+      <ellipse cx="72" cy="68" rx="3.5" ry="5" fill="#2b262d" />
+      <ellipse cx="60" cy="73" rx="3" ry="2" fill="#ff8fb1" />
+      <path d="M54 79 Q60 85 66 79" stroke="#2b262d" stroke-width="2.5" fill="none" stroke-linecap="round" />
+    </svg>
+    <span class="stamp-label">庫洛米</span>
+  `;
+  return stamp;
+}
+
 function renderGrid() {
   gridEl.innerHTML = "";
   const activeInPage =
@@ -168,14 +194,8 @@ function renderGrid() {
     slot.className = "slot";
 
     if (i < activeInPage) {
-      const stamp = document.createElement("div");
-      stamp.className = "stamp";
-      if (i === lastAnimatedIndex) {
-        stamp.classList.add("pop");
-      }
       const rot = state.rotations[i] ?? -6;
-      stamp.style.setProperty("--rot", `${rot}deg`);
-      stamp.textContent = "乖寶寶";
+      const stamp = createKuromiStampElement(rot, i === lastAnimatedIndex);
       slot.appendChild(stamp);
     }
 
@@ -267,7 +287,7 @@ function addStamp() {
   playStampSound();
   saveState();
   renderAll();
-  triggerKuromiCheer("耶！成功蓋下一顆乖寶寶章！");
+  triggerKuromiCheer("耶！成功蓋下一顆庫洛米章！");
 }
 
 function deductPoints() {
