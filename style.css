@@ -5,28 +5,30 @@
 body {
   margin: 0;
   min-height: 100vh;
-  padding: 24px 14px;
+  padding: 24px 16px;
   display: flex;
   justify-content: center;
   align-items: flex-start;
   background-color: #fce8f0;
-  background-image: url("images.jpg");
+  background-image: url("kuromi-bg.jpg");
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
   color: #3b2f2f;
   font-family: "Noto Sans TC", sans-serif;
 }
+
+/* 中間卡片變橫向寬版 */
 .app {
-  width: min(100%, 500px);
+  width: min(100%, 880px);
 }
 
 .card {
-  background: #fffdf9;
+  background: rgba(255, 253, 249, 0.96);
   border: 2px solid #e2d5be;
-  border-radius: 18px;
-  padding: 22px;
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.07);
+  border-radius: 20px;
+  padding: 24px 28px;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.1);
 }
 
 /* === 動態庫洛米互動區樣式 === */
@@ -43,9 +45,9 @@ body {
   background: #fff0f6;
   color: #a61e4d;
   border: 1.5px solid #fcc2d7;
-  padding: 6px 14px;
+  padding: 6px 16px;
   border-radius: 999px;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   font-weight: 700;
   margin-bottom: 8px;
   box-shadow: 0 4px 10px rgba(214, 51, 132, 0.08);
@@ -53,8 +55,8 @@ body {
 }
 
 .mascot-frame {
-  width: 100%;
-  max-height: 185px;
+  width: min(100%, 420px);
+  max-height: 175px;
   border-radius: 14px;
   overflow: hidden;
   display: flex;
@@ -66,7 +68,7 @@ body {
 
 .mascot-frame img {
   width: 100%;
-  height: 185px;
+  height: 175px;
   object-fit: cover;
   border-radius: 14px;
   border: 2px solid #f3d9fa;
@@ -112,30 +114,37 @@ body {
 
 h1 {
   margin: 0;
-  font-size: 1.45rem;
+  font-size: 1.5rem;
 }
 
 .badge {
   background: #fdecea;
   color: #c0392b;
   border: 1px solid #f5c6cb;
-  padding: 5px 11px;
+  padding: 5px 12px;
   border-radius: 999px;
-  font-size: 0.9rem;
+  font-size: 0.92rem;
   white-space: nowrap;
 }
 
 .subtitle {
   margin: 6px 0 18px;
   color: #6b5b53;
-  font-size: 0.92rem;
+  font-size: 0.94rem;
 }
 
+/* 寬螢幕時 10 個印章排成一列，手機自動變 5 格一列 */
 .grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(10, 1fr);
   gap: 10px;
-  margin-bottom: 18px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 680px) {
+  .grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
 }
 
 .slot {
@@ -171,10 +180,10 @@ h1 {
 }
 
 .stamp-label {
-  font-size: 0.58rem;
+  font-size: 0.56rem;
   font-weight: 800;
   line-height: 1;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.4px;
 }
 
 .stamp.pop {
@@ -250,11 +259,33 @@ button.danger-ghost {
   color: #b02a2a;
 }
 
-/* === 獎勵兌換與歷史紀錄 === */
+/* === 獎勵兌換與歷史紀錄（寬螢幕左右雙欄） === */
 .section {
   margin-top: 22px;
   padding-top: 16px;
   border-top: 1px dashed #e2d5be;
+}
+
+@media (min-width: 720px) {
+  .card {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 24px;
+    align-items: start;
+  }
+
+  .mascot-box,
+  .top-bar,
+  .subtitle,
+  .grid,
+  .stamp-box {
+    grid-column: 1 / -1;
+  }
+
+  .section {
+    margin-top: 10px;
+    padding-top: 16px;
+  }
 }
 
 .section-head {
@@ -325,7 +356,7 @@ h2 {
   list-style: none;
   margin: 0;
   padding: 0;
-  max-height: 200px;
+  max-height: 220px;
   overflow-y: auto;
   display: grid;
   gap: 7px;
