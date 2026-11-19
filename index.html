@@ -3,49 +3,49 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>乖宝宝章互动集点卡</title>
+  <title>乖寶寶章互動集點卡</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <main class="app">
     <section class="card">
       <div class="top-bar">
-        <h1>乖宝宝集点卡</h1>
-        <span class="badge">持有章数：<strong id="count">0</strong> 颗</span>
+        <h1>乖寶寶集點卡</h1>
+        <span class="badge">持有章數：<strong id="count">0</strong> 顆</span>
       </div>
-      <p class="subtitle" id="milestoneText">本轮集点进度：0 / 10</p>
+      <p class="subtitle" id="milestoneText">本輪集點進度：0 / 10</p>
 
-      <!-- 10 个印章格子 -->
+      <!-- 10 個印章格子 -->
       <div id="grid" class="grid"></div>
 
-      <!-- 盖章原因与操作区 -->
+      <!-- 蓋章原因與操作區 -->
       <div class="stamp-box">
         <input
           id="reasonInput"
           type="text"
           maxlength="30"
-          placeholder="这次为什么获得乖宝宝章？（例如：准时睡觉、帮忙做家事）"
+          placeholder="這次為什麼獲得乖寶寶章？（例如：準時睡覺、幫忙做家事）"
         />
         <div class="actions">
-          <button id="stampBtn" type="button" class="primary">盖章 +1</button>
-          <button id="undoBtn" type="button" class="ghost">撤销上一笔</button>
+          <button id="stampBtn" type="button" class="primary">蓋章 +1</button>
+          <button id="undoBtn" type="button" class="ghost">撤銷上一筆</button>
           <button id="resetBtn" type="button" class="danger-ghost">清空全部</button>
         </div>
       </div>
 
-      <!-- 奖励兑换区 -->
+      <!-- 獎勵兌換與扣點區 -->
       <div class="section">
-        <h2>奖励兑换区</h2>
+        <h2>獎勵兌換與扣點</h2>
         <div id="rewardList" class="reward-list"></div>
       </div>
 
-      <!-- 历史纪录区 -->
+      <!-- 歷史紀錄區 -->
       <div class="section">
         <div class="section-head">
-          <h2>历史纪录</h2>
+          <h2>歷史紀錄</h2>
           <div class="io-actions">
-            <button id="exportBtn" type="button" class="mini-btn">复制存檔</button>
-            <button id="importBtn" type="button" class="mini-btn">导入存檔</button>
+            <button id="exportBtn" type="button" class="mini-btn">複製存檔</button>
+            <button id="importBtn" type="button" class="mini-btn">匯入存檔</button>
           </div>
         </div>
         <ul id="historyList" class="history-list"></ul>
