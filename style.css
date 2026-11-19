@@ -385,3 +385,22 @@ h2 {
   font-size: 0.85rem;
   margin: 0;
 }
+.ear-left {
+  transform-origin: 58px 52px;
+  animation: earWiggleL 2.4s ease-in-out infinite;
+}
+
+.ear-right {
+  transform-origin: 122px 52px;
+  animation: earWiggleR 2.4s ease-in-out infinite;
+}
+
+@keyframes earWiggleL {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-7deg); }
+}
+
+@keyframes earWiggleR {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(7deg); }
+}
