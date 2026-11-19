@@ -9,11 +9,14 @@ body {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  background: #f6f1e7;
+  background-color: #fce8f0;
+  background-image: url("kuromi-bg.jpg");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
   color: #3b2f2f;
   font-family: "Noto Sans TC", sans-serif;
 }
-
 .app {
   width: min(100%, 500px);
 }
