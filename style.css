@@ -1,36 +1,339 @@
-const mascotBox = document.getElementById("mascotBox");
-const mascotFrame = document.getElementById("mascotFrame");
-const speechBubble = document.getElementById("speechBubble");
+* {
+  box-sizing: border-box;
+}
 
-const KUROMI_LINES = [
-  "哼哼，表現不錯嘛！繼續保持～",
-  "再多集幾顆章就可以換獎勵囉！",
-  "今天也有乖乖聽話嗎？",
-  "庫洛米正在盯著你的集點卡喔！",
-  "超棒的！離大獎又更近一步了！",
-];
+body {
+  margin: 0;
+  min-height: 100vh;
+  padding: 24px 14px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  background: #f6f1e7;
+  color: #3b2f2f;
+  font-family: "Noto Sans TC", sans-serif;
+}
 
-function triggerKuromiCheer(customLine) {
-  if (!mascotFrame || !speechBubble) return;
-  if (customLine) {
-    speechBubble.textContent = customLine;
-  } else {
-    const pick = KUROMI_LINES[Math.floor(Math.random() * KUROMI_LINES.length)];
-    speechBubble.textContent = pick;
+.app {
+  width: min(100%, 500px);
+}
+
+.card {
+  background: #fffdf9;
+  border: 2px solid #e2d5be;
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.07);
+}
+
+/* === 動態庫洛米互動區樣式 === */
+.mascot-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 14px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.speech-bubble {
+  background: #fff0f6;
+  color: #a61e4d;
+  border: 1.5px solid #fcc2d7;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  box-shadow: 0 4px 10px rgba(214, 51, 132, 0.08);
+  transition: transform 0.2s ease;
+}
+
+.mascot-frame {
+  width: 100%;
+  max-height: 185px;
+  border-radius: 14px;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: kuromiFloat 2.8s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+
+.mascot-frame img {
+  width: 100%;
+  height: 185px;
+  object-fit: cover;
+  border-radius: 14px;
+  border: 2px solid #f3d9fa;
+}
+
+@keyframes kuromiFloat {
+  0%, 100% {
+    transform: translateY(0px) rotate(-1deg);
   }
-  mascotFrame.classList.remove("cheer");
-  void mascotFrame.offsetWidth; // 重新觸發動畫
-  mascotFrame.classList.add("cheer");
+  50% {
+    transform: translateY(-6px) rotate(1.2deg);
+  }
 }
 
-if (mascotBox) {
-  mascotBox.addEventListener("click", () => triggerKuromiCheer());
+.mascot-frame.cheer {
+  animation: kuromiCheer 0.55s cubic-bezier(0.28, 1.45, 0.42, 1);
 }
 
-stampBtn.addEventListener("click", () => {
-  triggerKuromiCheer("耶！成功蓋下一顆乖寶寶章！");
-});
+@keyframes kuromiCheer {
+  0%   { transform: scale(1) translateY(0); }
+  35%  { transform: scale(1.06, 0.94) translateY(-12px) rotate(-3deg); }
+  65%  { transform: scale(0.97, 1.03) translateY(-4px) rotate(3deg); }
+  100% { transform: scale(1) translateY(0) rotate(0deg); }
+}
 
-deductBtn.addEventListener("click", () => {
-  triggerKuromiCheer("哎呀被扣點了，下次要加油喔！");
-});
+#svgKuromi .eye {
+  transform-origin: center;
+  animation: eyeBlink 3.6s infinite;
+}
+
+@keyframes eyeBlink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  95%           { transform: scaleY(0.1); }
+}
+
+/* === 標題與集點格子 === */
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 1.45rem;
+}
+
+.badge {
+  background: #fdecea;
+  color: #c0392b;
+  border: 1px solid #f5c6cb;
+  padding: 5px 11px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.subtitle {
+  margin: 6px 0 18px;
+  color: #6b5b53;
+  font-size: 0.92rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.slot {
+  aspect-ratio: 1 / 1;
+  border: 2px dashed #d5c5ab;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: #faf6ef;
+  position: relative;
+}
+
+.stamp {
+  width: 80%;
+  height: 80%;
+  border: 2.5px solid #d63031;
+  border-radius: 50%;
+  color: #d63031;
+  font-size: 0.72rem;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  background: rgba(214, 48, 49, 0.05);
+  transform: rotate(var(--rot, -6deg));
+  user-select: none;
+}
+
+.stamp.pop {
+  animation: stampDrop 0.32s cubic-bezier(0.22, 1.35, 0.36, 1);
+}
+
+@keyframes stampDrop {
+  0% {
+    opacity: 0;
+    transform: scale(1.85) rotate(calc(var(--rot, -6deg) + 14deg));
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(var(--rot, -6deg));
+  }
+}
+
+/* === 輸入框與按鈕 === */
+.stamp-box input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid #dccbb0;
+  border-radius: 10px;
+  font-size: 0.92rem;
+  background: #fff;
+  color: #3b2f2f;
+  margin-bottom: 10px;
+}
+
+.stamp-box input:focus {
+  outline: none;
+  border-color: #d63031;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+button {
+  border: none;
+  border-radius: 10px;
+  padding: 9px 14px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.1s ease, opacity 0.15s ease;
+}
+
+button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+button.primary {
+  background: #d63031;
+  color: #fff;
+  flex: 1;
+}
+
+button.ghost {
+  background: #efe6d5;
+  color: #4a3b32;
+}
+
+button.danger-ghost {
+  background: #f9e2e2;
+  color: #b02a2a;
+}
+
+/* === 獎勵兌換與歷史紀錄 === */
+.section {
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px dashed #e2d5be;
+}
+
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+h2 {
+  margin: 0 0 10px;
+  font-size: 1.05rem;
+}
+
+.section-head h2 {
+  margin: 0;
+}
+
+.io-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.mini-btn {
+  padding: 5px 10px;
+  font-size: 0.78rem;
+  background: #efe6d5;
+  color: #4a3b32;
+}
+
+.reward-list {
+  display: grid;
+  gap: 8px;
+}
+
+.reward-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #faf6ef;
+  border: 1px solid #eadbc3;
+}
+
+.reward-info {
+  font-size: 0.9rem;
+}
+
+.reward-cost {
+  display: block;
+  font-size: 0.78rem;
+  color: #856f62;
+  margin-top: 2px;
+}
+
+.redeem-btn {
+  background: #27ae60;
+  color: #fff;
+  padding: 7px 12px;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.history-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 200px;
+  overflow-y: auto;
+  display: grid;
+  gap: 7px;
+}
+
+.history-item {
+  font-size: 0.84rem;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: #faf6ef;
+  border-left: 3.5px solid #d63031;
+  line-height: 1.45;
+}
+
+.history-item.redeem {
+  border-left-color: #27ae60;
+}
+
+.history-meta {
+  color: #8c7a6b;
+  font-size: 0.76rem;
+}
+
+.empty-tip {
+  color: #968576;
+  font-size: 0.85rem;
+  margin: 0;
+}
