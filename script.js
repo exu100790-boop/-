@@ -1,12 +1,12 @@
 const GRID_SIZE = 10;
 const STORAGE_KEY = "good_baby_stamp_v2";
 const USE_PIN = true;
-const STAMP_PIN = "1234"; // 可自行修改盖章/兑换/清空密码
+const STAMP_PIN = "980512";
 
 const REWARDS = [
-  { id: "r1", title: "喝一杯喜欢的手摇饮", cost: 3 },
+  { id: "r1", title: "喝一杯喜歡的手搖飲", cost: 3 },
   { id: "r2", title: "免做一次指定小事", cost: 5 },
-  { id: "r3", title: "一起吃顿好料大餐", cost: 10 },
+  { id: "r3", title: "一起吃頓好料大餐", cost: 10 },
 ];
 
 const gridEl = document.getElementById("grid");
@@ -23,6 +23,35 @@ const importBtn = document.getElementById("importBtn");
 
 let state = loadState();
 let lastAnimatedIndex = -1;
+
+// 在「獎勵兌換區」上方動態加入「自訂扣點」區塊，不用另外改 HTML
+const deductBox = document.createElement("div");
+deductBox.className = "stamp-box";
+deductBox.style.marginBottom = "14px";
+deductBox.innerHTML = `
+  <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+    <input
+      id="deductAmountInput"
+      type="number"
+      min="1"
+      value="1"
+      style="width:78px; margin-bottom:0; text-align:center;"
+    />
+    <input
+      id="deductReasonInput"
+      type="text"
+      maxlength="30"
+      placeholder="扣點原因（例如：犯規、兌換小東西）"
+      style="flex:1; min-width:150px; margin-bottom:0;"
+    />
+    <button id="deductBtn" type="button" class="danger-ghost">扣點</button>
+  </div>
+`;
+rewardListEl.parentElement.insertBefore(deductBox, rewardListEl);
+
+const deductAmountInputEl = document.getElementById("deductAmountInput");
+const deductReasonInputEl = document.getElementById("deductReasonInput");
+const deductBtn = document.getElementById("deductBtn");
 
 function defaultState() {
   return {
@@ -51,6 +80,20 @@ function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
+function syncRotationsToPoints() {
+  const activeInPage =
+    state.points % GRID_SIZE === 0 && state.points > 0
+      ? GRID_SIZE
+      : state.points % GRID_SIZE;
+
+  while (state.rotations.length < activeInPage) {
+    state.rotations.push(Math.floor(Math.random() * 17) - 8);
+  }
+  if (state.rotations.length > activeInPage) {
+    state.rotations = state.rotations.slice(0, activeInPage);
+  }
+}
+
 function formatNow() {
   const d = new Date();
   const pad = (n) => String(n).padStart(2, "0");
@@ -59,10 +102,10 @@ function formatNow() {
 
 function verifyPin(actionLabel) {
   if (!USE_PIN) return true;
-  const input = prompt(`请输入「${actionLabel}」密码（默认 1234）：`);
+  const input = prompt(`請輸入「${actionLabel}」密碼：`);
   if (input === null) return false;
   if (input !== STAMP_PIN) {
-    alert("密码错误，操作已取消！");
+    alert("密碼錯誤，操作已取消！");
     return false;
   }
   return true;
@@ -84,15 +127,16 @@ function playStampSound() {
     osc.start();
     osc.stop(ctx.currentTime + 0.14);
   } catch {
-    // 浏览器未授权音效时略过
+    // 瀏覽器未授權音效時略過
   }
 }
 
 function renderGrid() {
   gridEl.innerHTML = "";
-  const activeInPage = state.points % GRID_SIZE === 0 && state.points > 0
-    ? GRID_SIZE
-    : state.points % GRID_SIZE;
+  const activeInPage =
+    state.points % GRID_SIZE === 0 && state.points > 0
+      ? GRID_SIZE
+      : state.points % GRID_SIZE;
 
   for (let i = 0; i < GRID_SIZE; i++) {
     const slot = document.createElement("div");
@@ -106,7 +150,7 @@ function renderGrid() {
       }
       const rot = state.rotations[i] ?? -6;
       stamp.style.setProperty("--rot", `${rot}deg`);
-      stamp.textContent = "乖宝宝";
+      stamp.textContent = "乖寶寶";
       slot.appendChild(stamp);
     }
 
@@ -116,8 +160,8 @@ function renderGrid() {
   countEl.textContent = state.points;
   const completedRounds = Math.floor(state.points / GRID_SIZE);
   milestoneTextEl.textContent =
-    `本轮集点进度：${activeInPage} / ${GRID_SIZE}` +
-    (completedRounds > 0 ? `（已完成 ${completedRounds} 轮）` : "");
+    `本輪集點進度：${activeInPage} / ${GRID_SIZE}` +
+    (completedRounds > 0 ? `（已完成 ${completedRounds} 輪）` : "");
 }
 
 function renderRewards() {
@@ -128,12 +172,12 @@ function renderRewards() {
 
     const info = document.createElement("div");
     info.className = "reward-info";
-    info.innerHTML = `${reward.title}<span class="reward-cost">需要 ${reward.cost} 颗章</span>`;
+    info.innerHTML = `${reward.title}<span class="reward-cost">需要 ${reward.cost} 顆章</span>`;
 
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "redeem-btn";
-    btn.textContent = "兑换";
+    btn.textContent = "兌換";
     btn.disabled = state.points < reward.cost;
     btn.addEventListener("click", () => redeemReward(reward));
 
@@ -145,7 +189,7 @@ function renderRewards() {
 function renderHistory() {
   historyListEl.innerHTML = "";
   if (state.history.length === 0) {
-    historyListEl.innerHTML = `<p class="empty-tip">还没有任何纪录，快盖下第一个乖宝宝章吧！</p>`;
+    historyListEl.innerHTML = `<p class="empty-tip">還沒有任何紀錄，快蓋下第一個乖寶寶章吧！</p>`;
     return;
   }
 
@@ -161,21 +205,23 @@ function renderHistory() {
 }
 
 function renderAll() {
+  syncRotationsToPoints();
   renderGrid();
   renderRewards();
   renderHistory();
+  deductBtn.disabled = state.points <= 0;
   undoBtn.disabled = state.history.length === 0;
   resetBtn.disabled = state.points === 0 && state.history.length === 0;
 }
 
 function addStamp() {
-  if (!verifyPin("盖章")) return;
+  if (!verifyPin("蓋章")) return;
 
-  const reason = reasonInputEl.value.trim() || "表现超棒获得乖宝宝章";
+  const reason = reasonInputEl.value.trim() || "表現超棒獲得乖寶寶章";
   state.points += 1;
 
-  const posInPage = ((state.points - 1) % GRID_SIZE);
-  const randomAngle = Math.floor(Math.random() * 17) - 8; // -8deg ~ +8deg
+  const posInPage = (state.points - 1) % GRID_SIZE;
+  const randomAngle = Math.floor(Math.random() * 17) - 8;
   if (posInPage === 0) {
     state.rotations = [randomAngle];
   } else {
@@ -188,7 +234,7 @@ function addStamp() {
     type: "stamp",
     delta: 1,
     reason,
-    text: `获得 +1 章｜${reason}`,
+    text: `獲得 +1 章｜${reason}`,
     time: formatNow(),
   });
 
@@ -198,13 +244,43 @@ function addStamp() {
   renderAll();
 }
 
+function deductPoints() {
+  if (state.points <= 0) return;
+  const rawAmount = Math.floor(Number(deductAmountInputEl.value));
+  if (!Number.isFinite(rawAmount) || rawAmount <= 0) {
+    alert("請輸入大於 0 的扣點數量！");
+    return;
+  }
+  if (rawAmount > state.points) {
+    alert(`目前只有 ${state.points} 顆章，無法扣 ${rawAmount} 顆！`);
+    return;
+  }
+  if (!verifyPin("扣點")) return;
+
+  const reason = deductReasonInputEl.value.trim() || "手動扣點";
+  state.points -= rawAmount;
+  lastAnimatedIndex = -1;
+
+  state.history.unshift({
+    id: Date.now() + Math.random(),
+    type: "redeem",
+    delta: -rawAmount,
+    reason,
+    text: `扣點 -${rawAmount} 章｜${reason}`,
+    time: formatNow(),
+  });
+
+  deductReasonInputEl.value = "";
+  deductAmountInputEl.value = "1";
+  saveState();
+  renderAll();
+}
+
 function redeemReward(reward) {
   if (state.points < reward.cost) return;
-  if (!verifyPin("兑换奖励")) return;
+  if (!verifyPin("兌換獎勵")) return;
 
   state.points -= reward.cost;
-  const activeInPage = state.points % GRID_SIZE;
-  state.rotations = state.rotations.slice(0, activeInPage);
   lastAnimatedIndex = -1;
 
   state.history.unshift({
@@ -212,7 +288,7 @@ function redeemReward(reward) {
     type: "redeem",
     delta: -reward.cost,
     rewardTitle: reward.title,
-    text: `兑换「${reward.title}」(-${reward.cost} 章)`,
+    text: `兌換「${reward.title}」(-${reward.cost} 章)`,
     time: formatNow(),
   });
 
@@ -222,12 +298,10 @@ function redeemReward(reward) {
 
 function undoLast() {
   if (state.history.length === 0) return;
-  if (!verifyPin("撤销上一笔")) return;
+  if (!verifyPin("撤銷上一筆")) return;
 
   const last = state.history.shift();
   state.points = Math.max(0, state.points - (last.delta || 0));
-  const activeInPage = state.points % GRID_SIZE;
-  state.rotations = state.rotations.slice(0, activeInPage);
   lastAnimatedIndex = -1;
 
   saveState();
@@ -235,7 +309,7 @@ function undoLast() {
 }
 
 function resetAll() {
-  if (!confirm("确定要清空所有章数与历史纪录吗？")) return;
+  if (!confirm("確定要清空所有章數與歷史紀錄嗎？")) return;
   if (!verifyPin("清空全部")) return;
 
   state = defaultState();
@@ -248,14 +322,14 @@ async function exportSave() {
   const payload = JSON.stringify(state);
   try {
     await navigator.clipboard.writeText(payload);
-    alert("存檔代码已复制到剪贴簿！可以贴到另一台装置导入。");
+    alert("存檔代碼已複製到剪貼簿！可以貼到另一台裝置導入。");
   } catch {
-    prompt("请手动复制以下存檔代码：", payload);
+    prompt("請手動複製以下存檔代碼：", payload);
   }
 }
 
 function importSave() {
-  const raw = prompt("请贴上之前复制的存檔代码（会覆盖目前纪录）：");
+  const raw = prompt("請貼上之前複製的存檔代碼（會覆蓋目前紀錄）：");
   if (!raw) return;
   try {
     const parsed = JSON.parse(raw.trim());
@@ -267,15 +341,19 @@ function importSave() {
     lastAnimatedIndex = -1;
     saveState();
     renderAll();
-    alert("存檔导入成功！");
+    alert("存檔導入成功！");
   } catch {
-    alert("存檔格式不正确，导入失败！");
+    alert("存檔格式不正確，導入失敗！");
   }
 }
 
 stampBtn.addEventListener("click", addStamp);
 reasonInputEl.addEventListener("keydown", (e) => {
   if (e.key === "Enter") addStamp();
+});
+deductBtn.addEventListener("click", deductPoints);
+deductReasonInputEl.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") deductPoints();
 });
 undoBtn.addEventListener("click", undoLast);
 resetBtn.addEventListener("click", resetAll);
