@@ -3,6 +3,8 @@ const STORAGE_KEY = "good_baby_stamp_v2";
 const USE_PIN = true;
 const STAMP_PIN = "980512";
 
+const FIREBASE_DB_URL = "https://babycard-87f1b-default-rtdb.asia-southeast1.firebasedatabase.app";
+
 const REWARDS = [
   { id: "r1", title: "喝一杯喜歡的手搖飲", cost: 3 },
   { id: "r2", title: "免做一次指定小事", cost: 5 },
@@ -18,8 +20,10 @@ const undoBtn = document.getElementById("undoBtn");
 const resetBtn = document.getElementById("resetBtn");
 const rewardListEl = document.getElementById("rewardList");
 const historyListEl = document.getElementById("historyList");
+const refreshBtn = document.getElementById("refreshBtn");
 const exportBtn = document.getElementById("exportBtn");
 const importBtn = document.getElementById("importBtn");
+const syncStatusEl = document.getElementById("syncStatus");
 
 const mascotBox = document.getElementById("mascotBox");
 const mascotFrame = document.getElementById("mascotFrame");
@@ -33,7 +37,7 @@ const KUROMI_LINES = [
   "超棒的！離大獎又更近一步了！",
 ];
 
-let state = loadState();
+let state = loadLocalState();
 let lastAnimatedIndex = -1;
 
 // 動態建立自訂扣點區塊
@@ -65,6 +69,18 @@ const deductAmountInputEl = document.getElementById("deductAmountInput");
 const deductReasonInputEl = document.getElementById("deductReasonInput");
 const deductBtn = document.getElementById("deductBtn");
 
+function setSyncStatus(text) {
+  if (syncStatusEl) syncStatusEl.textContent = text;
+}
+
+function isCloudConfigured() {
+  return FIREBASE_DB_URL && !FIREBASE_DB_URL.includes("你的專案名稱");
+}
+
+function getCloudEndpoint() {
+  return `${FIREBASE_DB_URL.replace(/\/+$/, "")}/kuromi_card.json`;
+}
+
 function triggerKuromiCheer(customLine) {
   if (!mascotFrame || !speechBubble) return;
   if (customLine) {
@@ -83,26 +99,83 @@ function defaultState() {
     points: 0,
     rotations: [],
     history: [],
+    updatedAt: 0,
   };
 }
 
-function loadState() {
+function normalizeState(parsed) {
+  return {
+    points: Math.max(0, Number(parsed?.points) || 0),
+    rotations: Array.isArray(parsed?.rotations) ? parsed.rotations : [],
+    history: Array.isArray(parsed?.history) ? parsed.history : [],
+    updatedAt: Number(parsed?.updatedAt) || 0,
+  };
+}
+
+function loadLocalState() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return defaultState();
-    const parsed = JSON.parse(raw);
-    return {
-      points: Number(parsed.points) || 0,
-      rotations: Array.isArray(parsed.rotations) ? parsed.rotations : [],
-      history: Array.isArray(parsed.history) ? parsed.history : [],
-    };
+    return normalizeState(JSON.parse(raw));
   } catch {
     return defaultState();
   }
 }
 
-function saveState() {
+async function saveState() {
+  state.updatedAt = Date.now();
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+
+  if (!isCloudConfigured()) {
+    setSyncStatus("僅本機儲存");
+    return;
+  }
+
+  setSyncStatus("雲端同步中...");
+  try {
+    const res = await fetch(getCloudEndpoint(), {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(state),
+    });
+    if (!res.ok) throw new Error("Upload failed");
+    setSyncStatus("已同步至雲端 ✓");
+  } catch {
+    setSyncStatus("雲端離線（已存本機）");
+  }
+}
+
+async function loadCloudState(showToast = false) {
+  if (!isCloudConfigured()) {
+    setSyncStatus("尚未填寫雲端網址");
+    return;
+  }
+
+  setSyncStatus("讀取雲端中...");
+  try {
+    const res = await fetch(getCloudEndpoint());
+    if (!res.ok) throw new Error("Fetch failed");
+    const remoteRaw = await res.json();
+
+    if (remoteRaw && typeof remoteRaw === "object") {
+      const remote = normalizeState(remoteRaw);
+      if (remote.updatedAt >= state.updatedAt || (state.points === 0 && state.history.length === 0)) {
+        state = remote;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        lastAnimatedIndex = -1;
+        renderAll();
+      } else if (state.points > 0 || state.history.length > 0) {
+        await saveState();
+      }
+    } else if (state.points > 0 || state.history.length > 0) {
+      await saveState();
+    }
+
+    setSyncStatus("已同步至雲端 ✓");
+    if (showToast) triggerKuromiCheer("已經跟雲端同步到最新進度囉！");
+  } catch {
+    setSyncStatus("雲端連線失敗");
+  }
 }
 
 function syncRotationsToPoints() {
@@ -285,8 +358,8 @@ function addStamp() {
 
   reasonInputEl.value = "";
   playStampSound();
-  saveState();
   renderAll();
+  saveState();
   triggerKuromiCheer("耶！成功蓋下一顆庫洛米章！");
 }
 
@@ -318,8 +391,8 @@ function deductPoints() {
 
   deductReasonInputEl.value = "";
   deductAmountInputEl.value = "1";
-  saveState();
   renderAll();
+  saveState();
   triggerKuromiCheer("哎呀被扣點了，下次要加油喔！");
 }
 
@@ -339,8 +412,8 @@ function redeemReward(reward) {
     time: formatNow(),
   });
 
-  saveState();
   renderAll();
+  saveState();
   triggerKuromiCheer(`哇～成功兌換「${reward.title}」囉！`);
 }
 
@@ -352,8 +425,8 @@ function undoLast() {
   state.points = Math.max(0, state.points - (last.delta || 0));
   lastAnimatedIndex = -1;
 
-  saveState();
   renderAll();
+  saveState();
 }
 
 function resetAll() {
@@ -362,15 +435,15 @@ function resetAll() {
 
   state = defaultState();
   lastAnimatedIndex = -1;
-  saveState();
   renderAll();
+  saveState();
 }
 
 async function exportSave() {
   const payload = JSON.stringify(state);
   try {
     await navigator.clipboard.writeText(payload);
-    alert("存檔代碼已複製到剪貼簿！可以貼到另一台裝置匯入。");
+    alert("存檔代碼已複製到剪貼簿！");
   } catch {
     prompt("請手動複製以下存檔代碼：", payload);
   }
@@ -380,16 +453,11 @@ function importSave() {
   const raw = prompt("請貼上之前複製的存檔代碼（會覆蓋目前紀錄）：");
   if (!raw) return;
   try {
-    const parsed = JSON.parse(raw.trim());
-    state = {
-      points: Math.max(0, Number(parsed.points) || 0),
-      rotations: Array.isArray(parsed.rotations) ? parsed.rotations : [],
-      history: Array.isArray(parsed.history) ? parsed.history : [],
-    };
+    state = normalizeState(JSON.parse(raw.trim()));
     lastAnimatedIndex = -1;
-    saveState();
     renderAll();
-    alert("存檔匯入成功！");
+    saveState();
+    alert("存檔匯入成功並已同步！");
   } catch {
     alert("存檔格式不正確，匯入失敗！");
   }
@@ -409,7 +477,9 @@ deductReasonInputEl.addEventListener("keydown", (e) => {
 });
 undoBtn.addEventListener("click", undoLast);
 resetBtn.addEventListener("click", resetAll);
+if (refreshBtn) refreshBtn.addEventListener("click", () => loadCloudState(true));
 exportBtn.addEventListener("click", exportSave);
 importBtn.addEventListener("click", importSave);
 
 renderAll();
+loadCloudState(false);
