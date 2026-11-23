@@ -9,10 +9,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  background-color: #fce8f0;
   background: linear-gradient(135deg, #f3e5f5 0%, #fce4ec 50%, #ede7f6 100%);
-  background-size: cover;
-  background-position: center;
   background-attachment: fixed;
   color: #3b2f2f;
   font-family: "Noto Sans TC", sans-serif;
