@@ -480,6 +480,20 @@ resetBtn.addEventListener("click", resetAll);
 if (refreshBtn) refreshBtn.addEventListener("click", () => loadCloudState(true));
 exportBtn.addEventListener("click", exportSave);
 importBtn.addEventListener("click", importSave);
+.mascot-avatar {
+  width: 145px;
+  height: 145px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center 45%;
+  border: 3.5px solid #e599f7;
+  box-shadow: 0 6px 16px rgba(174, 62, 201, 0.18);
+  background-color: #eadcf8;
+  transition: transform 0.2s ease;
+}
 
+.mascot-box:hover .mascot-avatar {
+  transform: scale(1.04);
+}
 renderAll();
 loadCloudState(false);
