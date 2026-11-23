@@ -408,3 +408,20 @@ h2 {
   font-size: 0.85rem;
   margin: 0;
 }
+.mascot-avatar {
+  width: 145px;
+  height: 145px;
+  border-radius: 50%;
+  object-fit: cover;
+  /* 讓新圖在圓框內往下一點點，完美露出耳朵、小頭冠和玫瑰花 */
+  object-position: center 30%; 
+  border: 3.5px solid #e599f7;
+  box-shadow: 0 6px 16px rgba(174, 62, 201, 0.18);
+  background-color: #eadcf8;
+  transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.mascot-box:hover .mascot-avatar {
+  /* 游標移上去或點擊時，頭像會微微彈跳 */
+  transform: scale(1.05) translateY(-2px);
+}
