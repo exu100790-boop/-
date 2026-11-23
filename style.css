@@ -10,7 +10,7 @@ body {
   justify-content: center;
   align-items: flex-start;
   background-color: #fce8f0;
-  background-image: url("kuromi-bg.jpg");
+  background: linear-gradient(135deg, #f3e5f5 0%, #fce4ec 50%, #ede7f6 100%);
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
