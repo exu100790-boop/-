@@ -13,54 +13,40 @@
       <div class="mascot-box" id="mascotBox" title="點我跟庫洛米互動！">
         <div class="speech-bubble" id="speechBubble">今天也要當乖寶寶喔！</div>
         <div class="mascot-frame" id="mascotFrame">
-         <div class="mascot-frame" id="mascotFrame">
-  <svg id="svgKuromi" viewBox="0 0 180 150" style="width:170px; height:140px; overflow:visible;">
-    <g class="ear-left">
-      <path d="M52 56 Q24 22 36 10 Q54 16 66 48 Z" fill="#231f26" />
-      <circle cx="36" cy="12" r="6" fill="#ff7eb6" />
-    </g>
-    <g class="ear-right">
-      <path d="M128 56 Q156 22 144 10 Q126 16 114 48 Z" fill="#231f26" />
-      <circle cx="144" cy="12" r="6" fill="#ff7eb6" />
-    </g>
-    <ellipse cx="90" cy="126" rx="26" ry="18" fill="#231f26" />
-    <path d="M74 114 L90 122 L106 114 L102 126 L90 122 L78 126 Z" fill="#ff7eb6" />
-    <ellipse cx="90" cy="76" rx="46" ry="38" fill="#231f26" />
-    <ellipse cx="90" cy="82" rx="34" ry="26" fill="#fff9fb" />
-    <circle cx="90" cy="48" r="8" fill="#ff7eb6" />
-    <circle cx="87" cy="47" r="1.5" fill="#231f26" />
-    <circle cx="93" cy="47" r="1.5" fill="#231f26" />
-    <ellipse class="eye" cx="76" cy="80" rx="4.2" ry="6" fill="#231f26" />
-    <ellipse class="eye" cx="104" cy="80" rx="4.2" ry="6" fill="#231f26" />
-    <circle cx="75" cy="78" r="1.5" fill="#ffffff" />
-    <circle cx="103" cy="78" r="1.5" fill="#ffffff" />
-    <ellipse cx="66" cy="87" rx="5" ry="3" fill="#ffb3d1" opacity="0.8" />
-    <ellipse cx="114" cy="87" rx="5" ry="3" fill="#ffb3d1" opacity="0.8" />
-    <ellipse cx="90" cy="85" rx="3" ry="2" fill="#ff7eb6" />
-    <path d="M83 92 Q90 99 97 92" stroke="#231f26" stroke-width="2.6" fill="none" stroke-linecap="round" />
-  </svg>
-</div>
-          </svg>
-        </div>
-          <svg id="svgKuromi" viewBox="0 0 120 110" style="display:none; width:115px; height:105px;">
-            <polygon points="22,55 12,10 48,35" fill="#2b262d" />
-            <polygon points="98,55 108,10 72,35" fill="#2b262d" />
-            <circle cx="12" cy="10" r="5" fill="#ff8fb1" />
-            <circle cx="108" cy="10" r="5" fill="#ff8fb1" />
-            <ellipse cx="60" cy="64" rx="38" ry="32" fill="#2b262d" />
-            <ellipse cx="60" cy="69" rx="28" ry="22" fill="#ffffff" />
-            <circle cx="60" cy="44" r="7" fill="#ff8fb1" />
-            <ellipse class="eye" cx="48" cy="68" rx="3.5" ry="5" fill="#2b262d" />
-            <ellipse class="eye" cx="72" cy="68" rx="3.5" ry="5" fill="#2b262d" />
-            <ellipse cx="60" cy="73" rx="3" ry="2" fill="#ff8fb1" />
-            <path d="M54 79 Q60 85 66 79" stroke="#2b262d" stroke-width="2.5" fill="none" stroke-linecap="round" />
+          <svg id="svgKuromi" viewBox="0 0 180 150" style="width:170px; height:140px; overflow:visible;">
+            <g class="ear-left">
+              <path d="M52 56 Q24 22 36 10 Q54 16 66 48 Z" fill="#231f26" />
+              <circle cx="36" cy="12" r="6" fill="#ff7eb6" />
+            </g>
+            <g class="ear-right">
+              <path d="M128 56 Q156 22 144 10 Q126 16 114 48 Z" fill="#231f26" />
+              <circle cx="144" cy="12" r="6" fill="#ff7eb6" />
+            </g>
+            <ellipse cx="90" cy="126" rx="26" ry="18" fill="#231f26" />
+            <path d="M74 114 L90 122 L106 114 L102 126 L90 122 L78 126 Z" fill="#ff7eb6" />
+            <ellipse cx="90" cy="76" rx="46" ry="38" fill="#231f26" />
+            <ellipse cx="90" cy="82" rx="34" ry="26" fill="#fff9fb" />
+            <circle cx="90" cy="48" r="8" fill="#ff7eb6" />
+            <circle cx="87" cy="47" r="1.5" fill="#231f26" />
+            <circle cx="93" cy="47" r="1.5" fill="#231f26" />
+            <ellipse class="eye" cx="76" cy="80" rx="4.2" ry="6" fill="#231f26" />
+            <ellipse class="eye" cx="104" cy="80" rx="4.2" ry="6" fill="#231f26" />
+            <circle cx="75" cy="78" r="1.5" fill="#ffffff" />
+            <circle cx="103" cy="78" r="1.5" fill="#ffffff" />
+            <ellipse cx="66" cy="87" rx="5" ry="3" fill="#ffb3d1" opacity="0.8" />
+            <ellipse cx="114" cy="87" rx="5" ry="3" fill="#ffb3d1" opacity="0.8" />
+            <ellipse cx="90" cy="85" rx="3" ry="2" fill="#ff7eb6" />
+            <path d="M83 92 Q90 99 97 92" stroke="#231f26" stroke-width="2.6" fill="none" stroke-linecap="round" />
           </svg>
         </div>
       </div>
 
       <div class="top-bar">
         <h1>乖寶寶集點卡</h1>
-        <span class="badge">持有章數：<strong id="count">0</strong> 顆</span>
+        <div class="badge-group">
+          <span id="syncStatus" class="sync-pill">準備中...</span>
+          <span class="badge">持有章數：<strong id="count">0</strong> 顆</span>
+        </div>
       </div>
       <p class="subtitle" id="milestoneText">本輪集點進度：0 / 10</p>
 
@@ -93,6 +79,7 @@
         <div class="section-head">
           <h2>歷史紀錄</h2>
           <div class="io-actions">
+            <button id="refreshBtn" type="button" class="mini-btn">重新同步</button>
             <button id="exportBtn" type="button" class="mini-btn">複製存檔</button>
             <button id="importBtn" type="button" class="mini-btn">匯入存檔</button>
           </div>
