@@ -10,7 +10,7 @@ body {
   justify-content: center;
   align-items: flex-start;
   background-color: #fce8f0;
-  background-image: url("images.jpg");
+  background-image: url("kuromi-bg.jpg");
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -18,7 +18,6 @@ body {
   font-family: "Noto Sans TC", sans-serif;
 }
 
-/* 中間卡片變橫向寬版 */
 .app {
   width: min(100%, 880px);
 }
@@ -36,7 +35,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
   cursor: pointer;
   user-select: none;
 }
@@ -49,29 +48,17 @@ body {
   border-radius: 999px;
   font-size: 0.9rem;
   font-weight: 700;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   box-shadow: 0 4px 10px rgba(214, 51, 132, 0.08);
   transition: transform 0.2s ease;
 }
 
 .mascot-frame {
-  width: min(100%, 420px);
-  max-height: 175px;
-  border-radius: 14px;
-  overflow: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
   animation: kuromiFloat 2.8s ease-in-out infinite;
   transform-origin: center bottom;
-}
-
-.mascot-frame img {
-  width: 100%;
-  height: 175px;
-  object-fit: cover;
-  border-radius: 14px;
-  border: 2px solid #f3d9fa;
 }
 
 @keyframes kuromiFloat {
@@ -89,8 +76,8 @@ body {
 
 @keyframes kuromiCheer {
   0%   { transform: scale(1) translateY(0); }
-  35%  { transform: scale(1.06, 0.94) translateY(-12px) rotate(-3deg); }
-  65%  { transform: scale(0.97, 1.03) translateY(-4px) rotate(3deg); }
+  35%  { transform: scale(1.08, 0.92) translateY(-12px) rotate(-3deg); }
+  65%  { transform: scale(0.96, 1.04) translateY(-4px) rotate(3deg); }
   100% { transform: scale(1) translateY(0) rotate(0deg); }
 }
 
@@ -104,17 +91,55 @@ body {
   95%           { transform: scaleY(0.1); }
 }
 
-/* === 標題與集點格子 === */
+.ear-left {
+  transform-origin: 58px 52px;
+  animation: earWiggleL 2.4s ease-in-out infinite;
+}
+
+.ear-right {
+  transform-origin: 122px 52px;
+  animation: earWiggleR 2.4s ease-in-out infinite;
+}
+
+@keyframes earWiggleL {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-7deg); }
+}
+
+@keyframes earWiggleR {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(7deg); }
+}
+
+/* === 標題與狀態膠囊 === */
 .top-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
   gap: 10px;
 }
 
 h1 {
   margin: 0;
   font-size: 1.5rem;
+}
+
+.badge-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.sync-pill {
+  background: #f3f0ff;
+  color: #5f3dc4;
+  border: 1px solid #d0bfff;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
 }
 
 .badge {
@@ -133,7 +158,7 @@ h1 {
   font-size: 0.94rem;
 }
 
-/* 寬螢幕時 10 個印章排成一列，手機自動變 5 格一列 */
+/* === 集點格子 === */
 .grid {
   display: grid;
   grid-template-columns: repeat(10, 1fr);
@@ -308,6 +333,7 @@ h2 {
 .io-actions {
   display: flex;
   gap: 6px;
+  flex-wrap: wrap;
 }
 
 .mini-btn {
@@ -384,23 +410,4 @@ h2 {
   color: #968576;
   font-size: 0.85rem;
   margin: 0;
-}
-.ear-left {
-  transform-origin: 58px 52px;
-  animation: earWiggleL 2.4s ease-in-out infinite;
-}
-
-.ear-right {
-  transform-origin: 122px 52px;
-  animation: earWiggleR 2.4s ease-in-out infinite;
-}
-
-@keyframes earWiggleL {
-  0%, 100% { transform: rotate(0deg); }
-  50% { transform: rotate(-7deg); }
-}
-
-@keyframes earWiggleR {
-  0%, 100% { transform: rotate(0deg); }
-  50% { transform: rotate(7deg); }
 }
