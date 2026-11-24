@@ -7,7 +7,7 @@ const STAMP_PIN = "980512";
 const FIREBASE_DB_URL = "https://babycard-87f1b-default-rtdb.asia-southeast1.firebasedatabase.app";
 
 const REWARDS = [
-  { id: "r1", title: "100元以下商品／美食兌換", cost: 2 },
+  { id: "r1", title: "100元以下商品", cost: 2 },
   { id: "r2", title: "100元～200元 商品", cost: 3 },
   { id: "r3", title: "200元～300元 商品", cost: 4 },
   { id: "r4", title: "300元～400元 商品", cost: 5 },
