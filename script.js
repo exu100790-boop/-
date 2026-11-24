@@ -8,15 +8,15 @@ const FIREBASE_DB_URL = "https://babycard-87f1b-default-rtdb.asia-southeast1.fir
 
 const REWARDS = [
   { id: "r1", title: "100元以下商品／美食兌換", cost: 2 },
-  { id: "r2", title: "100元～200元 商品／美食兌換", cost: 3 },
-  { id: "r3", title: "200元～300元 商品／美食兌換", cost: 4 },
-  { id: "r4", title: "300元～400元 商品／美食兌換", cost: 5 },
-  { id: "r5", title: "400元～500元 商品／美食兌換", cost: 6 },
-  { id: "r6", title: "500元～600元 商品／美食兌換", cost: 7 },
-  { id: "r7", title: "600元～700元 商品／美食兌換", cost: 8 },
-  { id: "r8", title: "700元～800元 商品／美食兌換", cost: 9 },
-  { id: "r9", title: "800元～900元 商品／美食兌換", cost: 10 },
-  { id: "r10", title: "900元～1000元 商品／美食兌換", cost: 11 },
+  { id: "r2", title: "100元～200元 商品", cost: 3 },
+  { id: "r3", title: "200元～300元 商品", cost: 4 },
+  { id: "r4", title: "300元～400元 商品", cost: 5 },
+  { id: "r5", title: "400元～500元 商品", cost: 6 },
+  { id: "r6", title: "500元～600元 商品", cost: 7 },
+  { id: "r7", title: "600元～700元 商品", cost: 8 },
+  { id: "r8", title: "700元～800元 商品", cost: 9 },
+  { id: "r9", title: "800元～900元 商品", cost: 10 },
+  { id: "r10", title: "900元～1000元 商品", cost: 11 },
   { id: "r11", title: "吃大餐", cost: 20 },
 ];
 
