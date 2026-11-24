@@ -1,4 +1,5 @@
 const GRID_SIZE = 10;
+const MAX_POINTS = 20;
 const STORAGE_KEY = "good_baby_stamp_v2";
 const USE_PIN = true;
 const STAMP_PIN = "980512";
@@ -6,9 +7,17 @@ const STAMP_PIN = "980512";
 const FIREBASE_DB_URL = "https://babycard-87f1b-default-rtdb.asia-southeast1.firebasedatabase.app";
 
 const REWARDS = [
-  { id: "r1", title: "喝一杯喜歡的手搖飲", cost: 3 },
-  { id: "r2", title: "免做一次指定小事", cost: 5 },
-  { id: "r3", title: "一起吃頓好料大餐", cost: 10 },
+  { id: "r1", title: "100元以下商品／美食兌換", cost: 2 },
+  { id: "r2", title: "100元～200元 商品／美食兌換", cost: 3 },
+  { id: "r3", title: "200元～300元 商品／美食兌換", cost: 4 },
+  { id: "r4", title: "300元～400元 商品／美食兌換", cost: 5 },
+  { id: "r5", title: "400元～500元 商品／美食兌換", cost: 6 },
+  { id: "r6", title: "500元～600元 商品／美食兌換", cost: 7 },
+  { id: "r7", title: "600元～700元 商品／美食兌換", cost: 8 },
+  { id: "r8", title: "700元～800元 商品／美食兌換", cost: 9 },
+  { id: "r9", title: "800元～900元 商品／美食兌換", cost: 10 },
+  { id: "r10", title: "900元～1000元 商品／美食兌換", cost: 11 },
+  { id: "r11", title: "吃大餐", cost: 20 },
 ];
 
 const gridEl = document.getElementById("grid");
@@ -105,7 +114,7 @@ function defaultState() {
 
 function normalizeState(parsed) {
   return {
-    points: Math.max(0, Number(parsed?.points) || 0),
+    points: Math.min(MAX_POINTS, Math.max(0, Number(parsed?.points) || 0)),
     rotations: Array.isArray(parsed?.rotations) ? parsed.rotations : [],
     history: Array.isArray(parsed?.history) ? parsed.history : [],
     updatedAt: Number(parsed?.updatedAt) || 0,
@@ -123,6 +132,7 @@ function loadLocalState() {
 }
 
 async function saveState() {
+  state.points = Math.min(MAX_POINTS, Math.max(0, state.points));
   state.updatedAt = Date.now();
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 
@@ -275,11 +285,11 @@ function renderGrid() {
     gridEl.appendChild(slot);
   }
 
-  countEl.textContent = state.points;
+  countEl.textContent = `${state.points} / ${MAX_POINTS}`;
   const completedRounds = Math.floor(state.points / GRID_SIZE);
   milestoneTextEl.textContent =
     `本輪集點進度：${activeInPage} / ${GRID_SIZE}` +
-    (completedRounds > 0 ? `（已完成 ${completedRounds} 輪）` : "");
+    (completedRounds > 0 ? `（已完成 ${completedRounds} 輪，上限 ${MAX_POINTS} 顆）` : `（上限 ${MAX_POINTS} 顆）`);
 }
 
 function renderRewards() {
@@ -323,16 +333,22 @@ function renderHistory() {
 }
 
 function renderAll() {
+  state.points = Math.min(MAX_POINTS, Math.max(0, state.points));
   syncRotationsToPoints();
   renderGrid();
   renderRewards();
   renderHistory();
+  stampBtn.disabled = state.points >= MAX_POINTS;
   deductBtn.disabled = state.points <= 0;
   undoBtn.disabled = state.history.length === 0;
   resetBtn.disabled = state.points === 0 && state.history.length === 0;
 }
 
 function addStamp() {
+  if (state.points >= MAX_POINTS) {
+    alert(`已經集滿最高上限 ${MAX_POINTS} 顆章囉！先去兌換獎勵吧～`);
+    return;
+  }
   if (!verifyPin("蓋章")) return;
 
   const reason = reasonInputEl.value.trim() || "表現超棒獲得乖寶寶章";
@@ -360,7 +376,11 @@ function addStamp() {
   playStampSound();
   renderAll();
   saveState();
-  triggerKuromiCheer("耶！成功蓋下一顆庫洛米章！");
+  triggerKuromiCheer(
+    state.points >= MAX_POINTS
+      ? `哇！集滿 ${MAX_POINTS} 顆章啦！可以換吃大餐囉！`
+      : "耶！成功蓋下一顆庫洛米章！"
+  );
 }
 
 function deductPoints() {
@@ -422,7 +442,7 @@ function undoLast() {
   if (!verifyPin("撤銷上一筆")) return;
 
   const last = state.history.shift();
-  state.points = Math.max(0, state.points - (last.delta || 0));
+  state.points = Math.min(MAX_POINTS, Math.max(0, state.points - (last.delta || 0)));
   lastAnimatedIndex = -1;
 
   renderAll();
@@ -480,20 +500,6 @@ resetBtn.addEventListener("click", resetAll);
 if (refreshBtn) refreshBtn.addEventListener("click", () => loadCloudState(true));
 exportBtn.addEventListener("click", exportSave);
 importBtn.addEventListener("click", importSave);
-.mascot-avatar {
-  width: 145px;
-  height: 145px;
-  border-radius: 50%;
-  object-fit: cover;
-  object-position: center 45%;
-  border: 3.5px solid #e599f7;
-  box-shadow: 0 6px 16px rgba(174, 62, 201, 0.18);
-  background-color: #eadcf8;
-  transition: transform 0.2s ease;
-}
 
-.mascot-box:hover .mascot-avatar {
-  transform: scale(1.04);
-}
 renderAll();
 loadCloudState(false);
